@@ -116,7 +116,9 @@ procedure Demo1;
     sub.Me := sub;
     node.SetStatic(0, node.Me);
     node.SetStatic(1, sub.Me);
-	// 请注意不要在这里调用Collect，因为 node.Add(NewNode) 此句将生成一个局部变量，在proc1 退出之前不会释放。比较好的方法是在此函数之外调用Collect
+	// 请注意不要在这里调用Collect，因为 node.Add(NewNode) 此句
+	// 将生成一个局部变量，在proc1 退出之前不会释放。
+	// 比较好的方法是在此函数之外调用Collect
   end;
 
 begin

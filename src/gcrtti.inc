@@ -1,20 +1,4 @@
-{
-    This file is part of the Free Pascal run time library.
-    Copyright (c) 1999-2000 by Michael Van Canneyt
-    member of the Free Pascal development team
-
-    See the file COPYING.FPC, included in this distribution,
-    for details about the copyright.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
- **********************************************************************}
-
-{ Some RTTI record type copy from rtti.inc }
-
-{ the tk* constants are now declared in system.inc }
+{ Some RTTI record type are copied from rtti.inc }
 
 {$ifndef FPC_REQUIRES_PROPER_ALIGNMENT}
   {$define USE_PACKED}
@@ -72,8 +56,6 @@ type
     elType : Pointer;
     varType : Longint;
   end;
-
-  TRTTIProc = procedure(Data, TypeInfo, P1: Pointer);
 
 function aligntoptr(p : pointer) : pointer;inline;
 begin
@@ -198,8 +180,6 @@ begin
   end;
 end;
 
-
-{ if you modify this procedure, fpc_copy must be probably modified as well }
 {$ifdef VER2_6}
 procedure VisitArray(Data, typeInfo: Pointer; cb: TVisitProc);
 var
@@ -212,16 +192,6 @@ begin
     cb(Data, PArrayInfo(typeInfo)^.ElInfo, nil);
     Inc(Data, PArrayInfo(typeInfo)^.Size);
   end;
-end;
-
-procedure ArrayRTTI(Data,TypeInfo:Pointer;rttiproc:TRTTIProc; p1: Pointer);
-var
-  i: SizeInt;
-begin
-  typeInfo:=aligntoptr(typeInfo+2+PByte(typeInfo)[1]);
-  { Process elements }
-  for I:=0 to PArrayInfo(typeInfo)^.ElCount-1 do
-    rttiproc(Data+(I*PArrayInfo(typeInfo)^.Size),PArrayInfo(typeInfo)^.ElInfo, p1);
 end;
 {$else}
 procedure VisitArray(P, typeInfo: Pointer; cb: TVisitProc);
@@ -244,37 +214,6 @@ begin
   end;
 end;
 
-procedure ArrayRTTI(Data,TypeInfo:Pointer;rttiproc:TRTTIProc; p1: Pointer);
-var
-  i,Count,ElSize: SizeInt;
-  Info: Pointer;
-begin
-  typeInfo:=aligntoptr(typeInfo+2+PByte(typeInfo)[1]);
-  Count:=PArrayInfo(typeInfo)^.ElCount;
-  { no elements to process => exit }
-  if Count = 0 then
-    Exit;
-  ElSize:=PArrayInfo(typeInfo)^.Size div Count;
-  Info:=PArrayInfo(typeInfo)^.ElInfo;
-  { Process elements }
-  for I:=0 to Count-1 do
-    rttiproc(Data+(I*ElSize),Info, p1);
-end;
 {$endif}
-{
-Procedure fpc_finalize (Data,TypeInfo: Pointer);
-begin
-  case PByte(TypeInfo)^ of
-    tkArray :
-      arrayrtti(data,typeinfo,@int_finalize);
-    tkRecord:
-      recordrtti(data,typeinfo,@int_finalize);
-    tkInterface:
-      Intf_Decr_Ref(PPointer(Data)^);
-    tkDynArray:
-      fpc_dynarray_clear(PPointer(Data)^,TypeInfo);
-    tkVariant:
-      variant_clear(PVarData(Data)^);
-  end;
-end;  }
+
 
