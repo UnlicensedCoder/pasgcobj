@@ -1,19 +1,30 @@
 # object garbage collect for freepascal/delphi
 
 ## 说明
+  这个单元主要解决接口循环引用导致不能释放的问题。它通过RTTI遍历vmtInitTable表所有的接口字段，计算出真实的引用计数，并把计数为0的字段清除（调用IInterface._Release，同时字段置为nil）。
 
-  这个单元主要解决接口循环引用导致不能释放的问题。它通过RTTI遍历vmtInit表所有的接口字段，计算出真实的引用计数，并把计数为0的字段释放（调用IInterface._Release）。
+## 类和函数
+
+  interface IGCSupport 垃圾收集所需要的接口，只有实现了这个接口，才能被回收。
+  class TGCObject 从 TInterfacedObject 继承，除了添加垃圾收集所需的接口，本身没有添加新功能。 只有从这个类继承，其实例才能被回收。
+  procedure Collect; 收集所有实际引用计数为0的实例
+  procedure GetTotals(out objCnt, objSizes: Integer); 计算当前的实例数及占用内存
   
 ## 用法
 
   1. 从类 TGCObject 继承，和之前一样的方式进行代码设计。
-  2. 使用接口之后，调用gcobj单元的Collect。（需要确保所有明确的或隐含的局部变量已经清除之后）
-  
-  注意：多线程环境之下，可能有些问题，尤其是此线程创建的接口实例给其它线程使用，或者在其它线程之中释放。应该避免这种情况下使用本单元。
+  2. 创建实例，完成任务之后，调用gcobj单元的Collect。（需要确保所有明确的或隐含的局部变量已经清除之后）
+
+## 注意
+  1. 多线程环境之下，可能有些问题，尤其是此线程创建的接口实例给其它线程使用，或者在其它线程之中释放。应该避免这种情况下使用本单元。
+  2. 因为Collect函数要清除接口字段来解除相互引用，所以在析构函数Destroy中，需要判断接口字段是否为 nil。不要假设实例被释放的顺序。
+  3. 如果在Destroy中依赖于某个接口字段进行清除工作，应该重新设计避免这种依赖。
+  4. 如果实例没有因为循环引用导致不能释放的问题，那么在引用计数为0时会即时释放，并从全局链表中删除实例。
   
 ## 示例
 
 ```
+type
   INode = interface
   ['{67228E58-36F6-41A5-A8F9-80AA8DA78D75}']
     procedure SetMe(const Node: INode);
