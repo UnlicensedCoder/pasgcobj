@@ -5,10 +5,13 @@
 
 ## 类和函数
 
-  interface IGCSupport 垃圾收集所需要的接口，只有实现了这个接口，才能被回收。
-  class TGCObject 从 TInterfacedObject 继承，除了添加垃圾收集所需的接口，本身没有添加新功能。 只有从这个类继承，其实例才能被回收。
-  procedure Collect; 收集所有实际引用计数为0的实例
-  procedure GetTotals(out objCnt, objSizes: Integer); 计算当前的实例数及占用内存
+  1. interface IGCSupport 垃圾收集所需要的接口，只有实现了这个接口，才能被回收。
+  
+  2. class TGCObject 从 TInterfacedObject 继承，除了添加垃圾收集所需的接口，本身没有添加新功能。 只有从这个类继承，其实例才能被回收。
+  
+  3. procedure Collect; 收集所有实际引用计数为0的实例
+  
+  4. procedure GetTotals(out objCnt, objSizes: Integer); 计算当前的实例数及占用内存
   
 ## 用法
 
